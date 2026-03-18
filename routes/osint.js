@@ -482,8 +482,6 @@ router.get('/activity', (req, res) => {
   res.json(userLog.slice(0, 50));
 });
 
-module.exports = router;
-
 // ─── SSL ANALYZER ─────────────────────────────────────────────────────────────
 router.post('/ssl', async (req, res) => {
   const { domain } = req.body;
@@ -516,6 +514,7 @@ router.post('/ssl', async (req, res) => {
   }
 });
 
+
 // ─── NETWORK INTEL ────────────────────────────────────────────────────────────
 router.post('/network', async (req, res) => {
   const { query, type } = req.body;
@@ -539,3 +538,5 @@ router.post('/network', async (req, res) => {
     res.json({ query, type, error: 'Network lookup failed', note: e.message, timestamp: new Date().toISOString() });
   }
 });
+
+module.exports = router;
