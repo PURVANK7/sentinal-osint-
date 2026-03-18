@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: sentinel-osint-platform
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: BASE_URL
+        value: https://sentinel-osint-platform.onrender.com
+      # Optional - add in Render dashboard:
+      # GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+      # FACEBOOK_APP_ID, FACEBOOK_APP_SECRET
+      # LINKEDIN_CLIENT_ID, LINKEDIN_CLIENT_SECRET
+      # ABUSEIPDB_KEY, OTX_KEY, VT_KEY, SHODAN_KEY, HIBP_KEY

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SENTINEL · OSINT Platform v2</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ AUTH VIEW ══════════════════════════════════ -->
+  <div id="auth-view" class="view active">
+    <canvas id="matrix-canvas"></canvas>
+    <div class="auth-grid-overlay"></div>
+
+    <div class="auth-wrapper">
+      <div class="auth-brand">
+        <div class="brand-logo"><i class="fas fa-crosshairs"></i></div>
+        <h1>SENTINEL</h1>
+        <p>OPEN SOURCE INTELLIGENCE PLATFORM v2</p>
+        <div class="brand-divider"></div>
+      </div>
+
+      <div class="auth-card">
+        <!-- Tabs -->
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="login">SIGN IN</button>
+          <button class="auth-tab" data-tab="register">REGISTER</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div id="tab-login" class="auth-form active">
+          <div class="social-login">
+            <a href="/auth/google" class="social-btn google-btn">
+              <i class="fab fa-google"></i> Continue with Google
+            </a>
+            <a href="/auth/facebook" class="social-btn facebook-btn">
+              <i class="fab fa-facebook-f"></i> Continue with Facebook
+            </a>
+            <a href="/auth/linkedin" class="social-btn linkedin-btn">
+              <i class="fab fa-linkedin-in"></i> Continue with LinkedIn
+            </a>
+          </div>
+          <div class="divider"><span>OR</span></div>
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> USERNAME OR EMAIL</label>
+            <input type="text" id="login-username" placeholder="username or email" />
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-lock"></i> PASSWORD</label>
+            <div class="input-pw-wrap">
+              <input type="password" id="login-password" placeholder="••••••••" />
+              <button class="toggle-pw" onclick="togglePw('login-password')"><i class="fas fa-eye"></i></button>
+            </div>
+          </div>
+          <div id="login-error" class="form-error hidden"></div>
+          <button id="login-btn" class="btn-primary" onclick="doLogin()">
+            <span>AUTHENTICATE</span>
+            <div class="btn-spinner hidden"></div>
+          </button>
+          <div class="demo-section">
+            <p>DEMO ACCOUNTS</p>
+            <div class="demo-pills">
+              <span class="pill red" onclick="fillLogin('redteam','redteam123')">🔴 redteam</span>
+              <span class="pill blue" onclick="fillLogin('blueteam','blueteam123')">🔵 blueteam</span>
+              <span class="pill gold" onclick="fillLogin('admin','Admin@Sentinel2024!')">⭐ admin</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="tab-register" class="auth-form">
+          <div class="social-login">
+            <a href="/auth/google" class="social-btn google-btn">
+              <i class="fab fa-google"></i> Sign up with Google
+            </a>
+            <a href="/auth/facebook" class="social-btn facebook-btn">
+              <i class="fab fa-facebook-f"></i> Sign up with Facebook
+            </a>
+            <a href="/auth/linkedin" class="social-btn linkedin-btn">
+              <i class="fab fa-linkedin-in"></i> Sign up with LinkedIn
+            </a>
+          </div>
+          <div class="divider"><span>OR</span></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fas fa-user"></i> FULL NAME</label>
+              <input type="text" id="reg-name" placeholder="John Doe" />
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-at"></i> USERNAME</label>
+              <input type="text" id="reg-username" placeholder="johndoe" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-envelope"></i> EMAIL ADDRESS</label>
+            <input type="email" id="reg-email" placeholder="john@example.com" />
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-phone"></i> PHONE NUMBER</label>
+            <input type="tel" id="reg-phone" placeholder="+91 98765 43210" />
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-lock"></i> PASSWORD</label>
+            <div class="input-pw-wrap">
+              <input type="password" id="reg-password" placeholder="Min 8 characters" />
+              <button class="toggle-pw" onclick="togglePw('reg-password')"><i class="fas fa-eye"></i></button>
+            </div>
+          </div>
+          <div class="password-strength" id="pw-strength"></div>
+          <div id="reg-error" class="form-error hidden"></div>
+          <button id="reg-btn" class="btn-primary" onclick="doRegister()">
+            <span>CREATE ACCOUNT</span>
+            <div class="btn-spinner hidden"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DASHBOARD VIEW ════════════════════════════ -->
+  <div id="dashboard-view" class="view">
+    <!-- Sidebar -->
+    <nav id="sidebar">
+      <div class="sidebar-brand">
+        <i class="fas fa-crosshairs"></i><span>SENTINEL</span>
+      </div>
+
+      <div class="sidebar-user" id="sidebar-user">
+        <div class="user-av" id="user-av">A</div>
+        <div class="user-info">
+          <div id="user-display-name">Operator</div>
+          <div id="user-team-tag" class="team-tag">—</div>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label">OVERVIEW</div>
+        <a class="nav-item active" data-panel="panel-dashboard"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+        <a class="nav-item" data-panel="panel-activity"><i class="fas fa-history"></i>Activity Log</a>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label red-label">🔴 RED TEAM</div>
+        <a class="nav-item" data-panel="panel-ip"><i class="fas fa-globe"></i>IP Lookup</a>
+        <a class="nav-item" data-panel="panel-subdomain"><i class="fas fa-sitemap"></i>Subdomain Enum</a>
+        <a class="nav-item" data-panel="panel-username"><i class="fas fa-user-secret"></i>Username Recon</a>
+        <a class="nav-item" data-panel="panel-port"><i class="fas fa-plug"></i>Port Scanner</a>
+        <a class="nav-item" data-panel="panel-network"><i class="fas fa-network-wired"></i>Network Intel</a>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label blue-label">🔵 BLUE TEAM</div>
+        <a class="nav-item" data-panel="panel-whois"><i class="fas fa-id-card"></i>WHOIS Lookup</a>
+        <a class="nav-item" data-panel="panel-dns"><i class="fas fa-server"></i>DNS Records</a>
+        <a class="nav-item" data-panel="panel-email"><i class="fas fa-envelope"></i>Email OSINT</a>
+        <a class="nav-item" data-panel="panel-threat"><i class="fas fa-shield-virus"></i>Threat Intel</a>
+        <a class="nav-item" data-panel="panel-darkweb"><i class="fas fa-spider"></i>Dark Web Monitor</a>
+        <a class="nav-item" data-panel="panel-ssl"><i class="fas fa-certificate"></i>SSL Analyzer</a>
+      </div>
+
+      <div class="nav-group" id="admin-nav" style="display:none">
+        <div class="nav-label gold-label">⭐ ADMIN</div>
+        <a class="nav-item" data-panel="panel-admin"><i class="fas fa-shield-alt"></i>Admin Panel</a>
+        <a class="nav-item" data-panel="panel-users"><i class="fas fa-users"></i>User Management</a>
+      </div>
+
+      <div class="sidebar-foot">
+        <button id="logout-btn"><i class="fas fa-sign-out-alt"></i> LOGOUT</button>
+      </div>
+    </nav>
+
+    <!-- Main -->
+    <main id="main">
+      <div class="topbar">
+        <button id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+        <div class="topbar-right">
+          <div class="online-dot"><span></span>ONLINE</div>
+          <div id="topbar-clock"></div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD PANEL -->
+      <div id="panel-dashboard" class="panel active">
+        <div class="panel-hdr"><h2><i class="fas fa-tachometer-alt"></i> INTELLIGENCE DASHBOARD</h2><p>Real-time OSINT operations overview</p></div>
+        <div class="stats-row">
+          <div class="stat red-stat"><i class="fas fa-search"></i><div><div class="sval" id="s-total">0</div><div class="slbl">TOTAL SCANS</div></div></div>
+          <div class="stat blue-stat"><i class="fas fa-globe"></i><div><div class="sval" id="s-ips">0</div><div class="slbl">IPs ANALYZED</div></div></div>
+          <div class="stat amber-stat"><i class="fas fa-exclamation-triangle"></i><div><div class="sval" id="s-threats">0</div><div class="slbl">THREATS FOUND</div></div></div>
+          <div class="stat green-stat"><i class="fas fa-check-circle"></i><div><div class="sval" id="s-clean">0</div><div class="slbl">CLEAN TARGETS</div></div></div>
+        </div>
+        <div class="dash-grid">
+          <div class="dash-card">
+            <div class="card-hdr">QUICK LAUNCH</div>
+            <div class="ql-grid">
+              <button class="ql" data-panel="panel-ip"><i class="fas fa-globe"></i>IP Lookup</button>
+              <button class="ql" data-panel="panel-whois"><i class="fas fa-id-card"></i>WHOIS</button>
+              <button class="ql" data-panel="panel-subdomain"><i class="fas fa-sitemap"></i>Subdomains</button>
+              <button class="ql" data-panel="panel-dns"><i class="fas fa-server"></i>DNS</button>
+              <button class="ql" data-panel="panel-email"><i class="fas fa-envelope"></i>Email OSINT</button>
+              <button class="ql" data-panel="panel-username"><i class="fas fa-user-secret"></i>Username</button>
+              <button class="ql" data-panel="panel-threat"><i class="fas fa-shield-virus"></i>Threat Intel</button>
+              <button class="ql" data-panel="panel-ssl"><i class="fas fa-certificate"></i>SSL Check</button>
+              <button class="ql" data-panel="panel-network"><i class="fas fa-network-wired"></i>Network</button>
+              <button class="ql" data-panel="panel-darkweb"><i class="fas fa-spider"></i>Dark Web</button>
+            </div>
+          </div>
+          <div class="dash-card">
+            <div class="card-hdr">RECENT ACTIVITY</div>
+            <div id="recent-list" class="recent-list"><div class="empty-state">No scans yet — run your first tool</div></div>
+          </div>
+          <div class="dash-card full">
+            <div class="card-hdr">API SERVICES STATUS</div>
+            <div class="services-grid">
+              <div class="svc"><span class="dot green"></span><span>ip-api.com</span><em>FREE · Active</em></div>
+              <div class="svc"><span class="dot green"></span><span>Google DNS</span><em>FREE · Active</em></div>
+              <div class="svc"><span class="dot green"></span><span>crt.sh (Subdomains)</span><em>FREE · Active</em></div>
+              <div class="svc"><span class="dot green"></span><span>RDAP / WHOIS</span><em>FREE · Active</em></div>
+              <div class="svc"><span class="dot green"></span><span>HackerNews API</span><em>FREE · Active</em></div>
+              <div class="svc"><span class="dot green"></span><span>Dev.to API</span><em>FREE · Active</em></div>
+              <div class="svc"><span class="dot green"></span><span>GitLab API</span><em>FREE · Active</em></div>
+              <div class="svc"><span class="dot green"></span><span>Keybase API</span><em>FREE · Active</em></div>
+              <div class="svc"><span class="dot amber"></span><span>AbuseIPDB</span><em>KEY NEEDED</em></div>
+              <div class="svc"><span class="dot amber"></span><span>AlienVault OTX</span><em>KEY NEEDED</em></div>
+              <div class="svc"><span class="dot amber"></span><span>Shodan</span><em>KEY NEEDED</em></div>
+              <div class="svc"><span class="dot amber"></span><span>HaveIBeenPwned</span><em>KEY NEEDED</em></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- IP PANEL -->
+      <div id="panel-ip" class="panel">
+        <div class="panel-hdr red-hdr"><h2><i class="fas fa-globe"></i> IP LOOKUP</h2><p>Geolocation · ISP · Proxy detection · Abuse scoring · ASN info</p></div>
+        <div class="tool-form">
+          <div class="input-row">
+            <input type="text" id="ip-input" placeholder="Enter IP address (e.g. 8.8.8.8)" class="tool-input" onkeydown="if(event.key==='Enter')runTool('ip')"/>
+            <button class="btn-scan red-btn" id="ip-btn" onclick="runTool('ip')"><i class="fas fa-search"></i> SCAN</button>
+          </div>
+          <div class="quick-targets">
+            <span onclick="document.getElementById('ip-input').value='8.8.8.8'">8.8.8.8 (Google)</span>
+            <span onclick="document.getElementById('ip-input').value='1.1.1.1'">1.1.1.1 (Cloudflare)</span>
+            <span onclick="document.getElementById('ip-input').value='208.67.222.222'">208.67.222.222 (OpenDNS)</span>
+          </div>
+        </div>
+        <div id="ip-result" class="result-box hidden"></div>
+      </div>
+
+      <!-- WHOIS PANEL -->
+      <div id="panel-whois" class="panel">
+        <div class="panel-hdr blue-hdr"><h2><i class="fas fa-id-card"></i> WHOIS LOOKUP</h2><p>Domain registration · Registrant · Nameservers · Expiry</p></div>
+        <div class="tool-form">
+          <div class="input-row">
+            <input type="text" id="whois-input" placeholder="Enter domain (e.g. google.com)" class="tool-input" onkeydown="if(event.key==='Enter')runTool('whois')"/>
+            <button class="btn-scan blue-btn" id="whois-btn" onclick="runTool('whois')"><i class="fas fa-search"></i> LOOKUP</button>
+          </div>
+        </div>
+        <div id="whois-result" class="result-box hidden"></div>
+      </div>
+
+      <!-- DNS PANEL -->
+      <div id="panel-dns" class="panel">
+        <div class="panel-hdr blue-hdr"><h2><i class="fas fa-server"></i> DNS RECORDS</h2><p>A · AAAA · MX · NS · TXT · CNAME · SOA records</p></div>
+        <div class="tool-form">
+          <div class="input-row">
+            <input type="text" id="dns-input" placeholder="Enter domain (e.g. google.com)" class="tool-input" onkeydown="if(event.key==='Enter')runTool('dns')"/>
+            <button class="btn-scan blue-btn" id="dns-btn" onclick="runTool('dns')"><i class="fas fa-search"></i> LOOKUP</button>
+          </div>
+        </div>
+        <div id="dns-result" class="result-box hidden"></div>
+      </div>
+
+      <!-- SUBDOMAIN PANEL -->
+      <div id="panel-subdomain" class="panel">
+        <div class="panel-hdr red-hdr"><h2><i class="fas fa-sitemap"></i> SUBDOMAIN ENUMERATION</h2><p>Passive discovery via certificate transparency logs (crt.sh)</p></div>
+        <div class="tool-form">
+          <div class="input-row">
+            <input type="text" id="subdomain-input" placeholder="Enter domain (e.g. google.com)" class="tool-input" onkeydown="if(event.key==='Enter')runTool('subdomain')"/>
+            <button class="btn-scan red-btn" id="subdomain-btn" onclick="runTool('subdomain')"><i class="fas fa-search"></i> ENUMERATE</button>
+          </div>
+        </div>
+        <div id="subdomain-result" class="result-box hidden"></div>
+      </div>
+
+      <!-- EMAIL PANEL -->
+      <div id="panel-email" class="panel">
+        <div class="panel-hdr blue-hdr"><h2><i class="fas fa-envelope"></i> EMAIL OSINT</h2><p>MX validation · Breach check · Domain analysis</p></div>
+        <div class="tool-form">
+          <div class="input-row">
+            <input type="email" id="email-input" placeholder="Enter email address" class="tool-input" onkeydown="if(event.key==='Enter')runTool('email')"/>
+            <button class="btn-scan blue-btn" id="email-btn" onclick="runTool('email')"><i class="fas fa-search"></i> INVESTIGATE</button>
+          </div>
+        </div>
+        <div id="email-result" class="result-box hidden"></div>
+      </div>
+
+      <!-- USERNAME PANEL -->
+      <div id="panel-username" class="panel">
+        <div class="panel-hdr red-hdr"><h2><i class="fas fa-user-secret"></i> USERNAME RECON</h2><p>Search across 15+ platforms — GitHub · Reddit · Twitter · TikTok · Steam · more</p></div>
+        <div class="tool-form">
+          <div class="input-row">
+            <input type="text" id="username-input" placeholder="Enter username to search" class="tool-input" onkeydown="if(event.key==='Enter')runTool('username')"/>
+            <button class="btn-scan red-btn" id="username-btn" onclick="runTool('username')"><i class="fas fa-search"></i> SEARCH</button>
+          </div>
+        </div>
+        <div id="username-result" class="result-box hidden"></div>
+      </div>
+
+      <!-- THREAT INTEL PANEL -->
+      <div id="panel-threat" class="panel">
+        <div class="panel-hdr blue-hdr"><h2><i class="fas fa-shield-virus"></i> THREAT INTELLIGENCE</h2><p>AlienVault OTX · VirusTotal · Malicious IP/Domain check</p></div>
+        <div class="tool-form">
+          <div class="input-row">
+            <select id="threat-type" class="tool-select">
+              <option value="ip">IP Address</option>
+              <option value="domain">Domain</option>
+            </select>
+            <input type="text" id="threat-input" placeholder="Enter IP or domain" class="tool-input" onkeydown="if(event.key==='Enter')runTool('threat')"/>
+            <button class="btn-scan blue-btn" id="threat-btn" onclick="runTool('threat')"><i class="fas fa-search"></i> CHECK</button>
+          </div>
+        </div>
+        <div id="threat-result" class="result-box hidden"></div>
+      </div>
+
+      <!-- PORT PANEL -->
+      <div id="panel-port" class="panel">
+        <div class="panel-hdr red-hdr"><h2><i class="fas fa-plug"></i> PORT SCANNER</h2><p>Passive scanning via Shodan intelligence data</p></div>
+        <div class="warn-bar"><i class="fas fa-exclamation-triangle"></i> LEGAL: Passive scanning only. Active scanning without authorization is illegal.</div>
+        <div class="tool-form">
+          <div class="input-row">
+            <input type="text" id="port-input" placeholder="Enter IP address" class="tool-input" onkeydown="if(event.key==='Enter')runTool('port')"/>
+            <button class="btn-scan red-btn" id="port-btn" onclick="runTool('port')"><i class="fas fa-search"></i> SCAN</button>
+          </div>
+        </div>
+        <div id="port-result" class="result-box hidden"></div>
+      </div>
+
+      <!-- SSL PANEL -->
+      <div id="panel-ssl" class="panel">
+        <div class="panel-hdr blue-hdr"><h2><i class="fas fa-certificate"></i> SSL ANALYZER</h2><p>Certificate details · Expiry · Issuer · SANs · Chain validation</p></div>
+        <div class="tool-form">
+          <div class="input-row">
+            <input type="text" id="ssl-input" placeholder="Enter domain (e.g. google.com)" class="tool-input" onkeydown="if(event.key==='Enter')runTool('ssl')"/>
+            <button class="btn-scan blue-btn" id="ssl-btn" onclick="runTool('ssl')"><i class="fas fa-search"></i> ANALYZE</button>
+          </div>
+        </div>
+        <div id="ssl-result" class="result-box hidden"></div>
+      </div>
+
+      <!-- NETWORK INTEL PANEL -->
+      <div id="panel-network" class="panel">
+        <div class="panel-hdr red-hdr"><h2><i class="fas fa-network-wired"></i> NETWORK INTELLIGENCE</h2><p>BGP · ASN · Route info · Network block analysis</p></div>
+        <div class="tool-form">
+          <div class="input-row">
+            <select id="network-type" class="tool-select">
+              <option value="asn">ASN Number</option>
+              <option value="ip">IP / CIDR</option>
+            </select>
+            <input type="text" id="network-input" placeholder="e.g. AS15169 or 8.8.8.0/24" class="tool-input" onkeydown="if(event.key==='Enter')runTool('network')"/>
+            <button class="btn-scan red-btn" id="network-btn" onclick="runTool('network')"><i class="fas fa-search"></i> ANALYZE</button>
+          </div>
+        </div>
+        <div id="network-result" class="result-box hidden"></div>
+      </div>
+
+      <!-- DARKWEB PANEL -->
+      <div id="panel-darkweb" class="panel">
+        <div class="panel-hdr blue-hdr"><h2><i class="fas fa-spider"></i> DARK WEB MONITOR</h2><p>Leaked credentials · Brand mentions · Data breach monitoring</p></div>
+        <div class="tool-form">
+          <div class="input-row">
+            <select id="darkweb-type" class="tool-select">
+              <option value="email">Email / Domain</option>
+              <option value="keyword">Keyword</option>
+              <option value="company">Company</option>
+            </select>
+            <input type="text" id="darkweb-input" placeholder="Enter search term" class="tool-input" onkeydown="if(event.key==='Enter')runTool('darkweb')"/>
+            <button class="btn-scan blue-btn" id="darkweb-btn" onclick="runTool('darkweb')"><i class="fas fa-search"></i> MONITOR</button>
+          </div>
+        </div>
+        <div id="darkweb-result" class="result-box hidden"></div>
+      </div>
+
+      <!-- ACTIVITY LOG PANEL -->
+      <div id="panel-activity" class="panel">
+        <div class="panel-hdr"><h2><i class="fas fa-history"></i> ACTIVITY LOG</h2><p>Complete audit trail of all OSINT operations</p></div>
+        <div id="activity-table-wrap" class="table-wrap"><div class="empty-state">Loading...</div></div>
+      </div>
+
+      <!-- ADMIN PANEL -->
+      <div id="panel-admin" class="panel admin-only">
+        <div class="panel-hdr gold-hdr"><h2><i class="fas fa-shield-alt"></i> ADMIN PANEL</h2><p>Platform administration · System stats · Security controls</p></div>
+        <div class="stats-row" id="admin-stats-row">
+          <div class="stat gold-stat"><i class="fas fa-users"></i><div><div class="sval" id="a-total">—</div><div class="slbl">TOTAL USERS</div></div></div>
+          <div class="stat green-stat"><i class="fas fa-user-check"></i><div><div class="sval" id="a-active">—</div><div class="slbl">ACTIVE USERS</div></div></div>
+          <div class="stat red-stat"><i class="fas fa-user-ninja"></i><div><div class="sval" id="a-red">—</div><div class="slbl">RED TEAM</div></div></div>
+          <div class="stat blue-stat"><i class="fas fa-user-shield"></i><div><div class="sval" id="a-blue">—</div><div class="slbl">BLUE TEAM</div></div></div>
+        </div>
+        <div class="dash-card" style="margin-top:16px">
+          <div class="card-hdr">RECENT PLATFORM ACTIVITY</div>
+          <div id="admin-activity" class="recent-list"><div class="empty-state">Loading...</div></div>
+        </div>
+      </div>
+
+      <!-- USER MANAGEMENT PANEL -->
+      <div id="panel-users" class="panel admin-only">
+        <div class="panel-hdr gold-hdr"><h2><i class="fas fa-users"></i> USER MANAGEMENT</h2><p>Manage platform users · Roles · Teams · Access control</p></div>
+        <div id="users-table-wrap" class="table-wrap"><div class="empty-state">Loading...</div></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+</body>
+</html>
